@@ -1,0 +1,9 @@
+{
+	"name": "AucADF",
+	"location": "westeurope",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "6cdccbff-5651-4932-b94a-9baab279ba2a",
+		"tenantId": "6c51c659-9d52-41af-81f7-dde16380e813"
+	}
+}
