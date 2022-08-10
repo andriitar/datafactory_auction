@@ -20,10 +20,21 @@
 					"headers": {
 						"grant_type": "client_credentials",
 						"content_type": "application/x-www-form-urlencoded",
-						"client_id": "3744a5c5d4ca4731a2abdbc8ec12f05f",
 						"client_secret": "kahP2k65BVoz77OxQb25wy6BN5OTCHeS"
 					},
-					"body": "grant_type=client_credentials"
+					"body": "grant_type=client_credentials",
+					"authentication": {
+						"type": "Basic",
+						"username": "3744a5c5d4ca4731a2abdbc8ec12f05f",
+						"password": {
+							"type": "AzureKeyVaultSecret",
+							"store": {
+								"referenceName": "AzureKeyVault1",
+								"type": "LinkedServiceReference"
+							},
+							"secretName": "tokenClientSecret"
+						}
+					}
 				}
 			}
 		],
