@@ -36,9 +36,9 @@
 				],
 				"userProperties": [],
 				"typeProperties": {
-					"variableName": "last_updated_time",
+					"variableName": "lt",
 					"value": {
-						"value": "@activity('Web1').output.last_updated_timestamp",
+						"value": "@activity('Web1').output.last_updated_timestamp[0]",
 						"type": "Expression"
 					}
 				}
@@ -47,6 +47,9 @@
 		"variables": {
 			"last_updated_time": {
 				"type": "String"
+			},
+			"lt": {
+				"type": "Array"
 			}
 		},
 		"annotations": []
