@@ -1,0 +1,29 @@
+{
+	"name": "pipeline1",
+	"properties": {
+		"activities": [
+			{
+				"name": "Web1",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": "https://eu.api.blizzard.com/data/wow/token/?namespace=dynamic-eu",
+					"method": "GET",
+					"headers": {
+						"Authorization": "Bearer EUGmWlrL0C4AMsaQdMR71PILoE4Ha4UxUt"
+					},
+					"body": "grant_type=client_credentials&client_id=$clientId&client_secret=kahP2k65BVoz77OxQb25wy6BN5OTCHeS"
+				}
+			}
+		],
+		"annotations": []
+	}
+}
