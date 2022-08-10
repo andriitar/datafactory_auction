@@ -36,7 +36,7 @@
 				],
 				"userProperties": [],
 				"typeProperties": {
-					"variableName": "lt",
+					"variableName": "last_updated_time",
 					"value": {
 						"value": "@activity('Web1').output.last_updated_timestamp[0]",
 						"type": "Expression"
