@@ -35,14 +35,34 @@
 						}
 					}
 				}
+			},
+			{
+				"name": "Set variable1",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "token request",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "auth_token",
+					"value": {
+						"value": "@activity('token request').output.access_token",
+						"type": "Expression"
+					}
+				}
 			}
 		],
 		"variables": {
 			"last_updated_time": {
 				"type": "String"
 			},
-			"lt": {
-				"type": "Array"
+			"auth_token": {
+				"type": "String"
 			},
 			"tokenprice": {
 				"type": "String"
