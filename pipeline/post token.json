@@ -23,7 +23,7 @@
 						"client_id": "3744a5c5d4ca4731a2abdbc8ec12f05f",
 						"client_secret": "kahP2k65BVoz77OxQb25wy6BN5OTCHeS"
 					},
-					"body": ""
+					"body": "grant_type=client_credentials"
 				}
 			}
 		],
