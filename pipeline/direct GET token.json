@@ -24,7 +24,7 @@
 				}
 			},
 			{
-				"name": "Set variable1",
+				"name": "Set timestamp",
 				"type": "SetVariable",
 				"dependsOn": [
 					{
@@ -42,6 +42,26 @@
 						"type": "Expression"
 					}
 				}
+			},
+			{
+				"name": "Set token price",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Set timestamp",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "tokenprice",
+					"value": {
+						"value": "@string(activity('Web1').output.price)",
+						"type": "Expression"
+					}
+				}
 			}
 		],
 		"variables": {
@@ -50,6 +70,9 @@
 			},
 			"lt": {
 				"type": "Array"
+			},
+			"tokenprice": {
+				"type": "String"
 			}
 		},
 		"annotations": []
