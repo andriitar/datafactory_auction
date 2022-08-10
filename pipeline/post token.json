@@ -18,9 +18,12 @@
 					"url": "https://eu.battle.net/oauth/token",
 					"method": "POST",
 					"headers": {
-						"grant_type": "client_credentials"
+						"grant_type": "client_credentials",
+						"application": "x-www-form-urlencoded",
+						"client_id": "3744a5c5d4ca4731a2abdbc8ec12f05f",
+						"client_secret": "kahP2k65BVoz77OxQb25wy6BN5OTCHeS"
 					},
-					"body": "client_id=3744a5c5d4ca4731a2abdbc8ec12f05f&client_secret=kahP2k65BVoz77OxQb25wy6BN5OTCHeS"
+					"body": ""
 				}
 			}
 		],
