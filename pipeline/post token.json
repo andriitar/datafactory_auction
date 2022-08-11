@@ -55,7 +55,7 @@
 					},
 					"ifFalseActivities": [
 						{
-							"name": "Set variable1_copy2",
+							"name": "Set variables IF NOT",
 							"type": "SetVariable",
 							"dependsOn": [],
 							"userProperties": [],
@@ -149,6 +149,37 @@
 								"variableName": "last_updated_time",
 								"value": {
 									"value": "@string(activity('Get WoWToken Data').output.last_updated_timestamp)\n",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Save Output to Blob",
+							"type": "WebActivity",
+							"dependsOn": [
+								{
+									"activity": "Get WoWToken Data",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"url": "https://aucsa.blob.core.windows.net/tokenjson/wow_token_data.json?sp=racw&st=2022-08-11T12:38:31Z&se=2022-09-11T20:38:31Z&spr=https&sv=2021-06-08&sr=c&sig=3YiB7TBZ3fQLe29kN2SP%2FPUBL4YHbe9kreutkLQodtU%3D",
+								"method": "PUT",
+								"headers": {
+									"x-ms-blob-type": "BlockBlob"
+								},
+								"body": {
+									"value": "@activity('Get WoWToken Data').output",
 									"type": "Expression"
 								}
 							}
