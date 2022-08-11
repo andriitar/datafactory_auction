@@ -173,7 +173,10 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"url": "https://aucsa.blob.core.windows.net/tokenjson/wow_token_data.json?sp=racw&st=2022-08-11T12:38:31Z&se=2022-09-11T20:38:31Z&spr=https&sv=2021-06-08&sr=c&sig=3YiB7TBZ3fQLe29kN2SP%2FPUBL4YHbe9kreutkLQodtU%3D",
+								"url": {
+									"value": "@replace(variables('BlobSASURL'), '/tokenjson?', concat('/tokenjson/wowTokenPriceEu_', formatDateTime(utcnow(), 'yyyymmdd-hhmmss'), '.json?'))",
+									"type": "Expression"
+								},
 								"method": "PUT",
 								"headers": {
 									"x-ms-blob-type": "BlockBlob"
@@ -197,6 +200,10 @@
 			},
 			"token_price": {
 				"type": "String"
+			},
+			"BlobSASURL": {
+				"type": "String",
+				"defaultValue": "https://aucsa.blob.core.windows.net/tokenjson?sp=racw&st=2022-08-11T12:38:31Z&se=2022-09-11T20:38:31Z&spr=https&sv=2021-06-08&sr=c&sig=3YiB7TBZ3fQLe29kN2SP%2FPUBL4YHbe9kreutkLQodtU%3D"
 			}
 		},
 		"annotations": []
