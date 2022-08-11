@@ -24,14 +24,14 @@
 					"body": "grant_type=client_credentials",
 					"authentication": {
 						"type": "Basic",
-						"username": "3744a5c5d4ca4731a2abdbc8ec12f05f",
+						"username": "",
 						"password": {
 							"type": "AzureKeyVaultSecret",
 							"store": {
-								"referenceName": "AzureKeyVault1",
+								"referenceName": "AzureKeyVaultAuc",
 								"type": "LinkedServiceReference"
 							},
-							"secretName": "tokenClientSecret"
+							"secretName": "AuthClientCode"
 						}
 					}
 				}
