@@ -5,9 +5,6 @@
 		"factoryName": {
 			"value": "AucADF"
 		},
-		"AzureKeyVault1_properties_typeProperties_baseUrl": {
-			"value": "https://AucPetKeyVault.vault.azure.net/"
-		},
 		"AzureKeyVaultAuc_properties_typeProperties_baseUrl": {
 			"value": "https://AucPetKeyVault.vault.azure.net/"
 		},

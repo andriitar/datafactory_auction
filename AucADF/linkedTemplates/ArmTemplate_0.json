@@ -7,10 +7,6 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "AucADF"
 		},
-		"AzureKeyVault1_properties_typeProperties_baseUrl": {
-			"type": "string",
-			"defaultValue": "https://AucPetKeyVault.vault.azure.net/"
-		},
 		"AzureKeyVaultAuc_properties_typeProperties_baseUrl": {
 			"type": "string",
 			"defaultValue": "https://AucPetKeyVault.vault.azure.net/"
@@ -232,19 +228,6 @@
 					}
 				},
 				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/AzureKeyVault1')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureKeyVault",
-				"typeProperties": {
-					"baseUrl": "[parameters('AzureKeyVault1_properties_typeProperties_baseUrl')]"
-				}
 			},
 			"dependsOn": []
 		},

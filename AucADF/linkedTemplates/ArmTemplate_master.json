@@ -7,10 +7,6 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "AucADF"
 		},
-		"AzureKeyVault1_properties_typeProperties_baseUrl": {
-			"type": "string",
-			"defaultValue": "https://AucPetKeyVault.vault.azure.net/"
-		},
 		"AzureKeyVaultAuc_properties_typeProperties_baseUrl": {
 			"type": "string",
 			"defaultValue": "https://AucPetKeyVault.vault.azure.net/"
@@ -41,9 +37,6 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
-					},
-					"AzureKeyVault1_properties_typeProperties_baseUrl": {
-						"value": "[parameters('AzureKeyVault1_properties_typeProperties_baseUrl')]"
 					},
 					"AzureKeyVaultAuc_properties_typeProperties_baseUrl": {
 						"value": "[parameters('AzureKeyVaultAuc_properties_typeProperties_baseUrl')]"
