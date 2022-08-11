@@ -1,0 +1,24 @@
+{
+	"name": "Every15minutes",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "WoW Token to Blob",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Minute",
+				"interval": 15,
+				"startTime": "2022-08-11T15:02:00Z",
+				"timeZone": "UTC"
+			}
+		}
+	}
+}
