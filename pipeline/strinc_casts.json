@@ -1,0 +1,59 @@
+{
+	"name": "strinc_casts",
+	"properties": {
+		"activities": [
+			{
+				"name": "simple_utcnow",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "timestamp",
+					"value": {
+						"value": "@utcnow()",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "utc-to-yyyymmdd-hhmmss",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "timestamp",
+					"value": {
+						"value": "@formatDateTime(utcnow(), 'yyyymmdd-hhmmss')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "build-right-link",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "JsonSURL",
+					"value": {
+						"value": "@replace(variables('BlobSASURL'), '/tokenjson?', concat('/tokenjson/wowTokenPriceEu_', formatDateTime(utcnow(), 'yyyymmdd-hhmmss'), '.json?'))",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"variables": {
+			"timestamp": {
+				"type": "String"
+			},
+			"BlobSASURL": {
+				"type": "String",
+				"defaultValue": "https://aucsa.blob.core.windows.net/tokenjson?sp=racw&st=2022-08-11T12:38:31Z&se=2022-09-11T20:38:31Z&spr=https&sv=2021-06-08&sr=c&sig=3YiB7TBZ3fQLe29kN2SP%2FPUBL4YHbe9kreutkLQodtU%3D"
+			},
+			"JsonSURL": {
+				"type": "String"
+			}
+		},
+		"annotations": []
+	}
+}
