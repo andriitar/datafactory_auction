@@ -174,7 +174,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"url": {
-									"value": "@replace(variables('BlobSASURL'), '/tokenjson?', concat('/tokenjson/wowTokenPriceEu_', formatDateTime(utcnow(), 'yyyymmdd-hhmmss'), '.json?'))",
+									"value": "@replace(variables('BlobSASURL'), '/tokenjson?', concat('/tokenjson/wowTokenPriceEu_', formatDateTime(utcnow(), 'yyyyMMdd-hhmmss'), '.json?'))",
 									"type": "Expression"
 								},
 								"method": "PUT",
