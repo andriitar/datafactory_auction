@@ -24,7 +24,7 @@
 					"body": "grant_type=client_credentials",
 					"authentication": {
 						"type": "Basic",
-						"username": "",
+						"username": "3744a5c5d4ca4731a2abdbc8ec12f05f",
 						"password": {
 							"type": "AzureKeyVaultSecret",
 							"store": {
