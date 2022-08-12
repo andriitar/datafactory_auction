@@ -204,6 +204,9 @@
 			"BlobSASURL": {
 				"type": "String",
 				"defaultValue": "https://aucsa.blob.core.windows.net/tokenjson?sp=racw&st=2022-08-11T12:38:31Z&se=2022-09-11T20:38:31Z&spr=https&sv=2021-06-08&sr=c&sig=3YiB7TBZ3fQLe29kN2SP%2FPUBL4YHbe9kreutkLQodtU%3D"
+			},
+			"DaTimeArray": {
+				"type": "Array"
 			}
 		},
 		"annotations": []
