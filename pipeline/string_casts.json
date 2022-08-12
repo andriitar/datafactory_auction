@@ -7,7 +7,7 @@
 				"type": "SetVariable",
 				"dependsOn": [
 					{
-						"activity": "utc-to-yyyyMMdd-hhmmss",
+						"activity": "Append variable1",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -30,7 +30,7 @@
 				"typeProperties": {
 					"variableName": "timestamp",
 					"value": {
-						"value": "@formatDateTime(addToTime(utcnow(),4, 'Hour'), 'yyyyMMdd-hhmmss')",
+						"value": "@formatDateTime(addToTime(utcnow(),4, 'Hour'), 'yyyyMMdd-HHmmss')",
 						"type": "Expression"
 					}
 				}
@@ -54,6 +54,26 @@
 						"type": "Expression"
 					}
 				}
+			},
+			{
+				"name": "Append variable1",
+				"type": "AppendVariable",
+				"dependsOn": [
+					{
+						"activity": "utc-to-yyyyMMdd-hhmmss",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "DaTimeArray",
+					"value": {
+						"value": "@formatDateTime(utcnow(), 'yyyyMMdd-HHmmss')",
+						"type": "Expression"
+					}
+				}
 			}
 		],
 		"variables": {
@@ -66,6 +86,9 @@
 			},
 			"JsonSURL": {
 				"type": "String"
+			},
+			"DaTimeArray": {
+				"type": "Array"
 			}
 		},
 		"annotations": []
