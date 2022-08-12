@@ -1,11 +1,18 @@
 {
-	"name": "strinc_casts",
+	"name": "string_casts",
 	"properties": {
 		"activities": [
 			{
 				"name": "simple_utcnow",
 				"type": "SetVariable",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "utc-to-yyyyMMdd-hhmmss",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"userProperties": [],
 				"typeProperties": {
 					"variableName": "timestamp",
@@ -16,14 +23,14 @@
 				}
 			},
 			{
-				"name": "utc-to-yyyymmdd-hhmmss",
+				"name": "utc-to-yyyyMMdd-hhmmss",
 				"type": "SetVariable",
 				"dependsOn": [],
 				"userProperties": [],
 				"typeProperties": {
 					"variableName": "timestamp",
 					"value": {
-						"value": "@formatDateTime(utcnow(), 'yyyymmdd-hhmmss')",
+						"value": "@formatDateTime(addToTime(utcnow(),4, 'Hour'), 'yyyyMMdd-hhmmss')",
 						"type": "Expression"
 					}
 				}
@@ -31,7 +38,14 @@
 			{
 				"name": "build-right-link",
 				"type": "SetVariable",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "simple_utcnow",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"userProperties": [],
 				"typeProperties": {
 					"variableName": "JsonSURL",
