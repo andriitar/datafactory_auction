@@ -1,5 +1,5 @@
 {
-	"name": "Every15minutes",
+	"name": "Every5minutes",
 	"properties": {
 		"annotations": [],
 		"runtimeState": "Started",
@@ -15,7 +15,7 @@
 		"typeProperties": {
 			"recurrence": {
 				"frequency": "Minute",
-				"interval": 15,
+				"interval": 5,
 				"startTime": "2022-08-12T12:00:00",
 				"timeZone": "FLE Standard Time"
 			}
