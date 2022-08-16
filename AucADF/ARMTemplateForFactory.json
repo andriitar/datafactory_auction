@@ -194,7 +194,7 @@
 									"userProperties": [],
 									"typeProperties": {
 										"url": {
-											"value": "@replace(variables('BlobSASURL'), '/tokenjson?', concat('/tokenjson/wowTokenPriceEu_', formatDateTime(utcnow(), 'yyyyMMdd-Hmmss'), '.json?'))",
+											"value": "@replace(variables('BlobSASURL'), '/tokenjson?', concat('/tokenjson/wowTokenPriceEu_', formatDateTime(utcnow(), 'yyyyMMdd-HHmmss'), '.json?'))",
 											"type": "Expression"
 										},
 										"method": "PUT",
@@ -228,6 +228,9 @@
 					"BlobSASURL": {
 						"type": "String",
 						"defaultValue": "https://aucsa.blob.core.windows.net/tokenjson?sp=racw&st=2022-08-11T12:38:31Z&se=2022-09-11T20:38:31Z&spr=https&sv=2021-06-08&sr=c&sig=3YiB7TBZ3fQLe29kN2SP%2FPUBL4YHbe9kreutkLQodtU%3D"
+					},
+					"DaTimeArray": {
+						"type": "Array"
 					}
 				},
 				"annotations": []
@@ -386,7 +389,7 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/strinc_casts')]",
+			"name": "[concat(parameters('factoryName'), '/string_casts')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -394,7 +397,14 @@
 					{
 						"name": "simple_utcnow",
 						"type": "SetVariable",
-						"dependsOn": [],
+						"dependsOn": [
+							{
+								"activity": "Append variable1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
 						"userProperties": [],
 						"typeProperties": {
 							"variableName": "timestamp",
@@ -405,14 +415,14 @@
 						}
 					},
 					{
-						"name": "utc-to-yyyymmdd-hhmmss",
+						"name": "utc-to-yyyyMMdd-hhmmss",
 						"type": "SetVariable",
 						"dependsOn": [],
 						"userProperties": [],
 						"typeProperties": {
 							"variableName": "timestamp",
 							"value": {
-								"value": "@formatDateTime(utcnow(), 'yyyymmdd-hhmmss')",
+								"value": "@formatDateTime(addToTime(utcnow(),4, 'Hour'), 'yyyyMMdd-HHmmss')",
 								"type": "Expression"
 							}
 						}
@@ -420,12 +430,39 @@
 					{
 						"name": "build-right-link",
 						"type": "SetVariable",
-						"dependsOn": [],
+						"dependsOn": [
+							{
+								"activity": "simple_utcnow",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
 						"userProperties": [],
 						"typeProperties": {
 							"variableName": "JsonSURL",
 							"value": {
 								"value": "@replace(variables('BlobSASURL'), '/tokenjson?', concat('/tokenjson/wowTokenPriceEu_', formatDateTime(utcnow(), 'yyyymmdd-hhmmss'), '.json?'))",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Append variable1",
+						"type": "AppendVariable",
+						"dependsOn": [
+							{
+								"activity": "utc-to-yyyyMMdd-hhmmss",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "DaTimeArray",
+							"value": {
+								"value": "@formatDateTime(utcnow(), 'yyyyMMdd-HHmmss')",
 								"type": "Expression"
 							}
 						}
@@ -445,6 +482,9 @@
 					},
 					"JsonSURL": {
 						"type": "String"
+					},
+					"DaTimeArray": {
+						"type": "Array"
 					}
 				},
 				"annotations": []
@@ -465,7 +505,7 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/Every15minutes')]",
+			"name": "[concat(parameters('factoryName'), '/Every5minutes')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -484,7 +524,7 @@
 				"typeProperties": {
 					"recurrence": {
 						"frequency": "Minute",
-						"interval": 15,
+						"interval": 5,
 						"startTime": "2022-08-12T12:00:00",
 						"timeZone": "FLE Standard Time"
 					}
