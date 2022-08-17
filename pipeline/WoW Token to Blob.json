@@ -110,7 +110,8 @@
 										"type": "Expression"
 									}
 								},
-								"body": "grant_type=client_credentials&client_id=$clientId&client_secret=kahP2k65BVoz77OxQb25wy6BN5OTCHeS"
+								"body": "grant_type=client_credentials&client_id=$clientId&client_secret=kahP2k65BVoz77OxQb25wy6BN5OTCHeS",
+								"httpRequestTimeout": "00:05:00"
 							}
 						},
 						{
