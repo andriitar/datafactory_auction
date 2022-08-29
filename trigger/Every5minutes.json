@@ -15,7 +15,7 @@
 		"typeProperties": {
 			"recurrence": {
 				"frequency": "Minute",
-				"interval": 5,
+				"interval": 15,
 				"startTime": "2022-08-12T12:00:00",
 				"timeZone": "FLE Standard Time"
 			}
