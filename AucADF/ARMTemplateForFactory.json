@@ -130,7 +130,8 @@
 												"type": "Expression"
 											}
 										},
-										"body": "grant_type=client_credentials&client_id=$clientId&client_secret=kahP2k65BVoz77OxQb25wy6BN5OTCHeS"
+										"body": "grant_type=client_credentials&client_id=$clientId&client_secret=kahP2k65BVoz77OxQb25wy6BN5OTCHeS",
+										"httpRequestTimeout": "00:05:00"
 									}
 								},
 								{
@@ -505,7 +506,7 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/Every5minutes')]",
+			"name": "[concat(parameters('factoryName'), '/Every15minutes')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -524,7 +525,7 @@
 				"typeProperties": {
 					"recurrence": {
 						"frequency": "Minute",
-						"interval": 5,
+						"interval": 15,
 						"startTime": "2022-08-12T12:00:00",
 						"timeZone": "FLE Standard Time"
 					}
