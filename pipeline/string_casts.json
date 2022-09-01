@@ -91,6 +91,9 @@
 				"type": "Array"
 			}
 		},
+		"folder": {
+			"name": "draft and test"
+		},
 		"annotations": []
 	}
 }

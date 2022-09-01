@@ -49,6 +49,9 @@
 				"type": "String"
 			}
 		},
+		"folder": {
+			"name": "draft and test"
+		},
 		"annotations": []
 	}
 }
