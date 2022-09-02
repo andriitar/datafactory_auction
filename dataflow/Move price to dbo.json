@@ -12,10 +12,24 @@
 					"name": "StagingStg"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "STG_dboSchema_test",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
 			"transformations": [
 				{
 					"name": "derivedColumnspriceymd"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "filter1"
 				}
 			],
 			"scriptLines": [
@@ -30,8 +44,41 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> StagingStg",
-				"StagingStg derive(tokenPrice_calc = toDecimal(divide(cnt, 10000), 10, 2),",
-				"          YMD_cal = toInteger(toString(toDate(WindowEndTime),'yyyyMMdd'))) ~> derivedColumnspriceymd"
+				"filter1 derive(tokenPrice_calc_decimal = toDecimal(divide(averageprice, 10000), 10, 2),",
+				"          tokenPrice_calc_string = toString(averageprice),",
+				"          YMD_calc_int = toInteger(toString(toDate(WindowEndTime),'yyyyMMdd')),",
+				"          YMD_string = toString(toDate(WindowEndTime),'yyyyMMdd')) ~> derivedColumnspriceymd",
+				"derivedColumnspriceymd select(mapColumn(",
+				"          WindowEndTime,",
+				"          cnt,",
+				"          tokenPrice_calc_decimal,",
+				"          YMD_cal_int = YMD_calc_int",
+				"     ),",
+				"     skipDuplicateMapInputs: false,",
+				"     skipDuplicateMapOutputs: false) ~> select1",
+				"StagingStg filter(greaterOrEqual(toDate(WindowEndTime),toDate('2022-09-02 00:00:00.0000000'))\r",
+				") ~> filter1",
+				"select1 sink(allowSchemaDrift: false,",
+				"     validateSchema: false,",
+				"     input(",
+				"          originalTimeWindow as timestamp,",
+				"          measureCount as integer,",
+				"          tokenPrice as decimal(10,2),",
+				"          YMD as integer,",
+				"          aggTimeCheck as timestamp",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          originalTimeWindow = WindowEndTime,",
+				"          measureCount = cnt,",
+				"          tokenPrice = tokenPrice_calc_decimal,",
+				"          YMD = YMD_cal_int",
+				"     )) ~> sink1"
 			]
 		}
 	}
