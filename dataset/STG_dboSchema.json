@@ -37,7 +37,7 @@
 		],
 		"typeProperties": {
 			"schema": "dbo",
-			"table": "TokenPrice"
+			"table": "TokenPrice2"
 		}
 	}
 }
