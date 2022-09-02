@@ -6,26 +6,61 @@
 			"sources": [
 				{
 					"dataset": {
-						"referenceName": "STG_dboSchema",
+						"referenceName": "STG_stgSchema",
 						"type": "DatasetReference"
 					},
 					"name": "StagingStg"
 				}
 			],
-			"sinks": [],
-			"transformations": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "STG_dboSchema",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				}
+			],
 			"scriptLines": [
 				"source(output(",
+				"          WindowEndTime as timestamp,",
+				"          cnt as integer,",
+				"          averageprice as decimal(12,2),",
+				"          min_time_win as timestamp,",
+				"          max_time_win as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> StagingStg",
+				"StagingStg derive(tokenPrice = toDecimal(divide(cnt, 10000), 10, 2),",
+				"          YMD = toString(toDate(WindowEndTime),'yyyyMMdd')) ~> derivedColumn1",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
 				"          originalTimeWindow as timestamp,",
 				"          measureCount as integer,",
 				"          tokenPrice as decimal(10,2),",
 				"          YMD as integer,",
 				"          aggTimeCheck as timestamp",
 				"     ),",
-				"     allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     format: 'table') ~> StagingStg"
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     saveOrder: 1,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          tokenPrice",
+				"     )) ~> sink1"
 			]
 		}
 	}
