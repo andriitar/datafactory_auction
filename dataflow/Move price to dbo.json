@@ -36,10 +36,10 @@
 					"name": "select1"
 				},
 				{
-					"name": "newRowsOnly"
+					"name": "selectStgColumns"
 				},
 				{
-					"name": "selectStgColumns"
+					"name": "getOnlyNewRows"
 				}
 			],
 			"scriptLines": [
@@ -66,27 +66,26 @@
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> StagingDbo",
 				"selectStgColumns derive(tokenPrice_decimal = toDecimal(divide(stg_averageprice, 10000), 10, 2),",
-				"          YMD_int = toInteger(toString(toDate(stg_WindowEndTime),'yyyyMMdd')),",
-				"          aggTimeCheck_time = toTimestamp((toString(stg_WindowEndTime)), 'HH:mm:ss')) ~> derivedColumnspriceymd",
+				"          YMD_int = toInteger(toString(toDate(stg_WindowEndTime),'yyyyMMdd'))) ~> derivedColumnspriceymd",
 				"derivedColumnspriceymd select(mapColumn(",
-				"          WindowEndTime = stg_WindowEndTime,",
-				"          cnt = stg_cnt,",
-				"          tokenPrice_calc_decimal = tokenPrice_decimal,",
-				"          YMD_cal_int = YMD_int",
+				"          stg_WindowEndTime,",
+				"          stg_cnt,",
+				"          stg_averageprice,",
+				"          tokenPrice_decimal,",
+				"          YMD_int",
 				"     ),",
 				"     skipDuplicateMapInputs: false,",
 				"     skipDuplicateMapOutputs: false) ~> select1",
-				"StagingStg, StagingDbo lookup(WindowEndTime != originalTimeWindow,",
-				"     multiple: false,",
-				"     pickup: 'any',",
-				"     broadcast: 'off')~> newRowsOnly",
-				"newRowsOnly select(mapColumn(",
+				"getOnlyNewRows select(mapColumn(",
 				"          stg_WindowEndTime = WindowEndTime,",
 				"          stg_cnt = cnt,",
 				"          stg_averageprice = averageprice",
 				"     ),",
 				"     skipDuplicateMapInputs: false,",
 				"     skipDuplicateMapOutputs: false) ~> selectStgColumns",
+				"StagingStg, StagingDbo exists(WindowEndTime == originalTimeWindow,",
+				"     negate:false,",
+				"     broadcast: 'auto')~> getOnlyNewRows",
 				"select1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
@@ -103,10 +102,10 @@
 				"     format: 'table',",
 				"     errorHandlingOption: 'stopOnFirstError',",
 				"     mapColumn(",
-				"          originalTimeWindow = WindowEndTime,",
-				"          measureCount = cnt,",
-				"          tokenPrice = tokenPrice_calc_decimal,",
-				"          YMD = YMD_cal_int",
+				"          originalTimeWindow = stg_WindowEndTime,",
+				"          measureCount = stg_cnt,",
+				"          tokenPrice = stg_averageprice,",
+				"          YMD = YMD_int",
 				"     )) ~> sink1"
 			]
 		}
