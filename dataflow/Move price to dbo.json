@@ -84,7 +84,7 @@
 				"     skipDuplicateMapInputs: false,",
 				"     skipDuplicateMapOutputs: false) ~> selectStgColumns",
 				"StagingStg, StagingDbo exists(WindowEndTime == originalTimeWindow,",
-				"     negate:false,",
+				"     negate:true,",
 				"     broadcast: 'auto')~> getOnlyNewRows",
 				"select1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
