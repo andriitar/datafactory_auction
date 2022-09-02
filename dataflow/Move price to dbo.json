@@ -23,10 +23,7 @@
 			],
 			"transformations": [
 				{
-					"name": "derivedColumn1"
-				},
-				{
-					"name": "select1"
+					"name": "derivedColumnspriceymd"
 				}
 			],
 			"scriptLines": [
@@ -42,17 +39,8 @@
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> StagingStg",
 				"StagingStg derive(tokenPrice_calc = toDecimal(divide(cnt, 10000), 10, 2),",
-				"          YMD_cal = toInteger(toString(toDate(WindowEndTime),'yyyyMMdd'))) ~> derivedColumn1",
-				"derivedColumn1 select(mapColumn(",
-				"          originalTimeWindow = WindowEndTime,",
-				"          measureCount = cnt,",
-				"          tokenPrice = averageprice,",
-				"          tokenPrice2 = tokenPrice_calc,",
-				"          YMDint = YMD_cal",
-				"     ),",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select1",
-				"select1 sink(allowSchemaDrift: true,",
+				"          YMD_cal = toInteger(toString(toDate(WindowEndTime),'yyyyMMdd'))) ~> derivedColumnspriceymd",
+				"derivedColumnspriceymd sink(allowSchemaDrift: false,",
 				"     validateSchema: false,",
 				"     input(",
 				"          originalTimeWindow as timestamp,",
