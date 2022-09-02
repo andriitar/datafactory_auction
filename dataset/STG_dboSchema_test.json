@@ -1,0 +1,43 @@
+{
+	"name": "STG_dboSchema_test",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "fp_staging",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "originalTimeWindow",
+				"type": "datetime2",
+				"scale": 7
+			},
+			{
+				"name": "measureCount",
+				"type": "smallint",
+				"precision": 5
+			},
+			{
+				"name": "tokenPrice",
+				"type": "decimal",
+				"precision": 10,
+				"scale": 2
+			},
+			{
+				"name": "YMD",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "aggTimeCheck",
+				"type": "time",
+				"scale": 7
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "TokenPrice_test"
+		}
+	}
+}
