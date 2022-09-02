@@ -1,0 +1,32 @@
+{
+	"name": "Move price to dbo",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "STG_dboSchema",
+						"type": "DatasetReference"
+					},
+					"name": "StagingStg"
+				}
+			],
+			"sinks": [],
+			"transformations": [],
+			"scriptLines": [
+				"source(output(",
+				"          originalTimeWindow as timestamp,",
+				"          measureCount as integer,",
+				"          tokenPrice as decimal(10,2),",
+				"          YMD as integer,",
+				"          aggTimeCheck as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> StagingStg"
+			]
+		}
+	}
+}
