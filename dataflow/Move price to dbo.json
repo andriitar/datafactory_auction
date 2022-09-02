@@ -12,15 +12,7 @@
 					"name": "StagingStg"
 				}
 			],
-			"sinks": [
-				{
-					"dataset": {
-						"referenceName": "STG_dboSchema_test",
-						"type": "DatasetReference"
-					},
-					"name": "sink1"
-				}
-			],
+			"sinks": [],
 			"transformations": [
 				{
 					"name": "derivedColumnspriceymd"
@@ -39,24 +31,7 @@
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> StagingStg",
 				"StagingStg derive(tokenPrice_calc = toDecimal(divide(cnt, 10000), 10, 2),",
-				"          YMD_cal = toInteger(toString(toDate(WindowEndTime),'yyyyMMdd'))) ~> derivedColumnspriceymd",
-				"derivedColumnspriceymd sink(allowSchemaDrift: false,",
-				"     validateSchema: false,",
-				"     input(",
-				"          originalTimeWindow as timestamp,",
-				"          measureCount as integer,",
-				"          tokenPrice as decimal(10,2),",
-				"          YMD as integer,",
-				"          aggTimeCheck as timestamp",
-				"     ),",
-				"     deletable:false,",
-				"     insertable:true,",
-				"     updateable:false,",
-				"     upsertable:false,",
-				"     format: 'table',",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true,",
-				"     errorHandlingOption: 'stopOnFirstError') ~> sink1"
+				"          YMD_cal = toInteger(toString(toDate(WindowEndTime),'yyyyMMdd'))) ~> derivedColumnspriceymd"
 			]
 		}
 	}
