@@ -5,6 +5,9 @@
 		"factoryName": {
 			"value": "AucADF"
 		},
+		"fp_staging_connectionString": {
+			"value": ""
+		},
 		"AzureKeyVaultAuc_properties_typeProperties_baseUrl": {
 			"value": "https://AucPetKeyVault.vault.azure.net/"
 		},

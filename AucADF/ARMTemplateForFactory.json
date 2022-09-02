@@ -7,6 +7,10 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "AucADF"
 		},
+		"fp_staging_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'fp_staging'"
+		},
 		"AzureKeyVaultAuc_properties_typeProperties_baseUrl": {
 			"type": "string",
 			"defaultValue": "https://AucPetKeyVault.vault.azure.net/"
@@ -323,6 +327,9 @@
 						"type": "String"
 					}
 				},
+				"folder": {
+					"name": "draft and test"
+				},
 				"annotations": []
 			},
 			"dependsOn": []
@@ -384,6 +391,9 @@
 					"ClientId": {
 						"type": "String"
 					}
+				},
+				"folder": {
+					"name": "draft and test"
 				},
 				"annotations": []
 			},
@@ -488,9 +498,60 @@
 						"type": "Array"
 					}
 				},
+				"folder": {
+					"name": "draft and test"
+				},
 				"annotations": []
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/STG_dboSchema')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "fp_staging",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "originalTimeWindow",
+						"type": "datetime2",
+						"scale": 7
+					},
+					{
+						"name": "measureCount",
+						"type": "smallint",
+						"precision": 5
+					},
+					{
+						"name": "tokenPrice",
+						"type": "decimal",
+						"precision": 10,
+						"scale": 2
+					},
+					{
+						"name": "YMD",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "aggTimeCheck",
+						"type": "time",
+						"scale": 7
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "TokenPrice"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/fp_staging')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/AzureKeyVaultAuc')]",
@@ -501,6 +562,19 @@
 				"type": "AzureKeyVault",
 				"typeProperties": {
 					"baseUrl": "[parameters('AzureKeyVaultAuc_properties_typeProperties_baseUrl')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/fp_staging')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('fp_staging_connectionString')]"
 				}
 			},
 			"dependsOn": []
@@ -533,6 +607,183 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/pipelines/WoW Token to Blob')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Move price to dbo')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "STG_stgSchema",
+								"type": "DatasetReference"
+							},
+							"name": "StagingStg"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "STG_dboSchema_test",
+								"type": "DatasetReference"
+							},
+							"name": "sink1"
+						}
+					],
+					"transformations": [
+						{
+							"name": "derivedColumn1"
+						},
+						{
+							"name": "select1"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          WindowEndTime as timestamp,",
+						"          cnt as integer,",
+						"          averageprice as decimal(12,2),",
+						"          min_time_win as timestamp,",
+						"          max_time_win as timestamp",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> StagingStg",
+						"StagingStg derive(tokenPrice_calc = toDecimal(divide(cnt, 10000), 10, 2),",
+						"          YMD_cal = toInteger(toString(toDate(WindowEndTime),'yyyyMMdd'))) ~> derivedColumn1",
+						"derivedColumn1 select(mapColumn(",
+						"          originalTimeWindow = WindowEndTime,",
+						"          measureCount = cnt,",
+						"          tokenPrice = averageprice,",
+						"          tokenPrice2 = tokenPrice_calc,",
+						"          YMDint = YMD_cal",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> select1",
+						"select1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          originalTimeWindow as timestamp,",
+						"          measureCount as integer,",
+						"          tokenPrice as decimal(10,2),",
+						"          YMD as integer,",
+						"          aggTimeCheck as timestamp",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError') ~> sink1"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/STG_stgSchema')]",
+				"[concat(variables('factoryId'), '/datasets/STG_dboSchema_test')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/STG_stgSchema')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "fp_staging",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "WindowEndTime",
+						"type": "datetime2",
+						"scale": 7
+					},
+					{
+						"name": "cnt",
+						"type": "smallint",
+						"precision": 5
+					},
+					{
+						"name": "averageprice",
+						"type": "decimal",
+						"precision": 12,
+						"scale": 2
+					},
+					{
+						"name": "min_time_win",
+						"type": "datetime2",
+						"scale": 7
+					},
+					{
+						"name": "max_time_win",
+						"type": "datetime2",
+						"scale": 7
+					}
+				],
+				"typeProperties": {
+					"schema": "stg",
+					"table": "JsonInput_short"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/fp_staging')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/STG_dboSchema_test')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "fp_staging",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "originalTimeWindow",
+						"type": "datetime2",
+						"scale": 7
+					},
+					{
+						"name": "measureCount",
+						"type": "smallint",
+						"precision": 5
+					},
+					{
+						"name": "tokenPrice",
+						"type": "decimal",
+						"precision": 10,
+						"scale": 2
+					},
+					{
+						"name": "YMD",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "aggTimeCheck",
+						"type": "time",
+						"scale": 7
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "TokenPrice_test"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/fp_staging')]"
 			]
 		}
 	]
