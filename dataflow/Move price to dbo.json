@@ -58,7 +58,7 @@
 				"     skipDuplicateMapOutputs: false) ~> select1",
 				"StagingStg filter(greaterOrEqual(toDate(WindowEndTime),toDate('2022-09-02 00:00:00.0000000'))\r",
 				") ~> filter1",
-				"select1 sink(allowSchemaDrift: false,",
+				"select1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          originalTimeWindow as timestamp,",
