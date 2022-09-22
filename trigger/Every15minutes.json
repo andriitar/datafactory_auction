@@ -16,7 +16,7 @@
 			"recurrence": {
 				"frequency": "Minute",
 				"interval": 15,
-				"startTime": "2022-08-12T12:00:00",
+				"startTime": "2022-09-22T00:00:00",
 				"timeZone": "FLE Standard Time"
 			}
 		}
