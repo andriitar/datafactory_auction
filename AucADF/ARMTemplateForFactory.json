@@ -232,7 +232,7 @@
 					},
 					"BlobSASURL": {
 						"type": "String",
-						"defaultValue": "https://aucsa.blob.core.windows.net/tokenjson?sp=racw&st=2022-08-11T12:38:31Z&se=2022-09-11T20:38:31Z&spr=https&sv=2021-06-08&sr=c&sig=3YiB7TBZ3fQLe29kN2SP%2FPUBL4YHbe9kreutkLQodtU%3D"
+						"defaultValue": "https://aucsa.blob.core.windows.net/tokenjson?sp=racwl&st=2022-09-22T09:20:49Z&se=2023-01-30T18:20:49Z&spr=https&sv=2021-06-08&sr=c&sig=MoN4y4fd7jQA1WPX2xUxr72DKyeGjpB9%2Brt7qd3%2F0vo%3D"
 					},
 					"DaTimeArray": {
 						"type": "Array"
@@ -333,6 +333,57 @@
 				"annotations": []
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pipeline-df')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Data flow1",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "Move price to dbo",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"StagingStg": {},
+									"StagingDbo": {},
+									"sink1": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"folder": {
+					"name": "draft and test"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/Move price to dbo')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/pipeline1')]",
@@ -554,6 +605,102 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/STG_dboSchema_test')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "fp_staging",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "originalTimeWindow",
+						"type": "datetime2",
+						"scale": 7
+					},
+					{
+						"name": "measureCount",
+						"type": "smallint",
+						"precision": 5
+					},
+					{
+						"name": "tokenPrice",
+						"type": "decimal",
+						"precision": 10,
+						"scale": 2
+					},
+					{
+						"name": "YMD",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "aggTimeCheck",
+						"type": "time",
+						"scale": 7
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "TokenPrice_test"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/fp_staging')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/STG_stgSchema')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "fp_staging",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "WindowEndTime",
+						"type": "datetime2",
+						"scale": 7
+					},
+					{
+						"name": "cnt",
+						"type": "smallint",
+						"precision": 5
+					},
+					{
+						"name": "averageprice",
+						"type": "decimal",
+						"precision": 12,
+						"scale": 2
+					},
+					{
+						"name": "min_time_win",
+						"type": "datetime2",
+						"scale": 7
+					},
+					{
+						"name": "max_time_win",
+						"type": "datetime2",
+						"scale": 7
+					}
+				],
+				"typeProperties": {
+					"schema": "stg",
+					"table": "JsonInput_short"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/fp_staging')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/AzureKeyVaultAuc')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -623,6 +770,13 @@
 								"type": "DatasetReference"
 							},
 							"name": "StagingStg"
+						},
+						{
+							"dataset": {
+								"referenceName": "STG_dboSchema",
+								"type": "DatasetReference"
+							},
+							"name": "StagingDbo"
 						}
 					],
 					"sinks": [
@@ -636,10 +790,16 @@
 					],
 					"transformations": [
 						{
-							"name": "derivedColumn1"
+							"name": "derivedColumnspriceymd"
 						},
 						{
 							"name": "select1"
+						},
+						{
+							"name": "selectStgColumns"
+						},
+						{
+							"name": "getOnlyNewRows"
 						}
 					],
 					"scriptLines": [
@@ -654,17 +814,40 @@
 						"     validateSchema: false,",
 						"     isolationLevel: 'READ_UNCOMMITTED',",
 						"     format: 'table') ~> StagingStg",
-						"StagingStg derive(tokenPrice_calc = toDecimal(divide(cnt, 10000), 10, 2),",
-						"          YMD_cal = toInteger(toString(toDate(WindowEndTime),'yyyyMMdd'))) ~> derivedColumn1",
-						"derivedColumn1 select(mapColumn(",
-						"          originalTimeWindow = WindowEndTime,",
-						"          measureCount = cnt,",
-						"          tokenPrice = averageprice,",
-						"          tokenPrice2 = tokenPrice_calc,",
-						"          YMDint = YMD_cal",
+						"source(output(",
+						"          originalTimeWindow as timestamp,",
+						"          measureCount as integer,",
+						"          tokenPrice as decimal(10,2),",
+						"          YMD as integer,",
+						"          aggTimeCheck as timestamp",
 						"     ),",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true) ~> select1",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> StagingDbo",
+						"selectStgColumns derive(tokenPrice_decimal = toDecimal(divide(stg_averageprice, 10000), 10, 2),",
+						"          YMD_int = toInteger(toString(toDate(stg_WindowEndTime),'yyyyMMdd')),",
+						"          WindowEndTime_str = toString(split(toString(stg_WindowEndTime), ' ')[2],'HH:mm:ss')) ~> derivedColumnspriceymd",
+						"derivedColumnspriceymd select(mapColumn(",
+						"          stg_WindowEndTime,",
+						"          stg_cnt,",
+						"          stg_averageprice,",
+						"          tokenPrice_decimal,",
+						"          YMD_int,",
+						"          WindowEndTime_str",
+						"     ),",
+						"     skipDuplicateMapInputs: false,",
+						"     skipDuplicateMapOutputs: false) ~> select1",
+						"getOnlyNewRows select(mapColumn(",
+						"          stg_WindowEndTime = WindowEndTime,",
+						"          stg_cnt = cnt,",
+						"          stg_averageprice = averageprice",
+						"     ),",
+						"     skipDuplicateMapInputs: false,",
+						"     skipDuplicateMapOutputs: false) ~> selectStgColumns",
+						"StagingStg, StagingDbo exists(WindowEndTime == originalTimeWindow,",
+						"     negate:true,",
+						"     broadcast: 'auto')~> getOnlyNewRows",
 						"select1 sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     input(",
@@ -679,111 +862,20 @@
 						"     updateable:false,",
 						"     upsertable:false,",
 						"     format: 'table',",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true,",
-						"     errorHandlingOption: 'stopOnFirstError') ~> sink1"
+						"     errorHandlingOption: 'stopOnFirstError',",
+						"     mapColumn(",
+						"          originalTimeWindow = stg_WindowEndTime,",
+						"          measureCount = stg_cnt,",
+						"          tokenPrice = stg_averageprice,",
+						"          YMD = YMD_int",
+						"     )) ~> sink1"
 					]
 				}
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/STG_stgSchema')]",
+				"[concat(variables('factoryId'), '/datasets/STG_dboSchema')]",
 				"[concat(variables('factoryId'), '/datasets/STG_dboSchema_test')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/STG_stgSchema')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "fp_staging",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [
-					{
-						"name": "WindowEndTime",
-						"type": "datetime2",
-						"scale": 7
-					},
-					{
-						"name": "cnt",
-						"type": "smallint",
-						"precision": 5
-					},
-					{
-						"name": "averageprice",
-						"type": "decimal",
-						"precision": 12,
-						"scale": 2
-					},
-					{
-						"name": "min_time_win",
-						"type": "datetime2",
-						"scale": 7
-					},
-					{
-						"name": "max_time_win",
-						"type": "datetime2",
-						"scale": 7
-					}
-				],
-				"typeProperties": {
-					"schema": "stg",
-					"table": "JsonInput_short"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/fp_staging')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/STG_dboSchema_test')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "fp_staging",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [
-					{
-						"name": "originalTimeWindow",
-						"type": "datetime2",
-						"scale": 7
-					},
-					{
-						"name": "measureCount",
-						"type": "smallint",
-						"precision": 5
-					},
-					{
-						"name": "tokenPrice",
-						"type": "decimal",
-						"precision": 10,
-						"scale": 2
-					},
-					{
-						"name": "YMD",
-						"type": "int",
-						"precision": 10
-					},
-					{
-						"name": "aggTimeCheck",
-						"type": "time",
-						"scale": 7
-					}
-				],
-				"typeProperties": {
-					"schema": "dbo",
-					"table": "TokenPrice_test"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/fp_staging')]"
 			]
 		}
 	]
