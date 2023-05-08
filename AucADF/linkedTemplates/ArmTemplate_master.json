@@ -9,7 +9,8 @@
 		},
 		"fp_staging_connectionString": {
 			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'fp_staging'"
+			"metadata": "Secure string for 'connectionString' of 'fp_staging'",
+			"defaultValue": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=admatardbserver.database.windows.net;Initial Catalog=fp_staging"
 		},
 		"AzureKeyVaultAuc_properties_typeProperties_baseUrl": {
 			"type": "string",
