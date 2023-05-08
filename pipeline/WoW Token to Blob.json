@@ -204,7 +204,7 @@
 			},
 			"BlobSASURL": {
 				"type": "String",
-				"defaultValue": "https://aucsa.blob.core.windows.net/?sv=2022-11-02&ss=bfqt&srt=sco&sp=rwdlacupiytfx&se=2023-09-01T00:18:28Z&st=2023-05-08T16:18:28Z&spr=https&sig=XJ7h9qEyqx7YrkxTg%2F0ZjIuMm9DRTfMc9KBhMsIDloE%3D"
+				"defaultValue": "https://aucsa.blob.core.windows.net/tokenjson?sv=2022-11-02&ss=bfqt&srt=sco&sp=rwdlacupiytfx&se=2023-09-01T00:18:28Z&st=2023-05-08T16:18:28Z&spr=https&sig=XJ7h9qEyqx7YrkxTg%2F0ZjIuMm9DRTfMc9KBhMsIDloE%3D"
 			},
 			"DaTimeArray": {
 				"type": "Array"
