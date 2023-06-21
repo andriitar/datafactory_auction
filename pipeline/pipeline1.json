@@ -1,0 +1,57 @@
+{
+	"name": "pipeline1",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get DevelopClientId",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": "https://aucpetkeyvault.vault.azure.net/secrets/AuthClientCode/2d9a08da64454230bc534bf10d79fd7b",
+					"method": "GET",
+					"authentication": {
+						"type": "MSI",
+						"resource": "https://vault.azure.net"
+					}
+				}
+			},
+			{
+				"name": "Store ClientId",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Get DevelopClientId",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "ClientId",
+					"value": {
+						"value": "@activity('Get DevelopClientId').output.value",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"variables": {
+			"ClientId": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "draft and test"
+		},
+		"annotations": []
+	}
+}

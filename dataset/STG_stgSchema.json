@@ -1,0 +1,43 @@
+{
+	"name": "STG_stgSchema",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "fp_staging",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "WindowEndTime",
+				"type": "datetime2",
+				"scale": 7
+			},
+			{
+				"name": "cnt",
+				"type": "smallint",
+				"precision": 5
+			},
+			{
+				"name": "averageprice",
+				"type": "decimal",
+				"precision": 12,
+				"scale": 2
+			},
+			{
+				"name": "min_time_win",
+				"type": "datetime2",
+				"scale": 7
+			},
+			{
+				"name": "max_time_win",
+				"type": "datetime2",
+				"scale": 7
+			}
+		],
+		"typeProperties": {
+			"schema": "stg",
+			"table": "JsonInput_short"
+		}
+	}
+}

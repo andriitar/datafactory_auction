@@ -1,0 +1,215 @@
+{
+	"name": "WoW Token to Blob",
+	"properties": {
+		"activities": [
+			{
+				"name": "token request",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": "https://eu.battle.net/oauth/token",
+					"method": "POST",
+					"headers": {
+						"grant-type": "client_credentials",
+						"content-type": "application/x-www-form-urlencoded"
+					},
+					"body": "grant_type=client_credentials",
+					"authentication": {
+						"type": "Basic",
+						"username": "3744a5c5d4ca4731a2abdbc8ec12f05f",
+						"password": {
+							"type": "AzureKeyVaultSecret",
+							"store": {
+								"referenceName": "AzureKeyVaultAuc",
+								"type": "LinkedServiceReference"
+							},
+							"secretName": "AuthClientCode"
+						}
+					}
+				}
+			},
+			{
+				"name": "If Not Expired",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "token request",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@greaterOrEquals(activity('token request').output.expires_in,1)",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "Set variables IF NOT",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "access_token",
+								"value": {
+									"value": "@string(activity('token request').output.token_type)",
+									"type": "Expression"
+								}
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "Store AccessToken",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "access_token",
+								"value": {
+									"value": "@activity('token request').output.access_token",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Get WoWToken Data",
+							"type": "WebActivity",
+							"dependsOn": [
+								{
+									"activity": "Store AccessToken",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"url": "https://eu.api.blizzard.com/data/wow/token/?namespace=dynamic-eu",
+								"method": "GET",
+								"headers": {
+									"Authorization": {
+										"value": "@string(concat('Bearer ', variables('access_token')))",
+										"type": "Expression"
+									}
+								},
+								"body": "grant_type=client_credentials&client_id=$clientId&client_secret=kahP2k65BVoz77OxQb25wy6BN5OTCHeS",
+								"httpRequestTimeout": "00:05:00"
+							}
+						},
+						{
+							"name": "Store TokenPrice",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Get WoWToken Data",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "token_price",
+								"value": {
+									"value": "@string(activity('Get WoWToken Data').output.price)",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Store TimeStamp",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Get WoWToken Data",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "last_updated_time",
+								"value": {
+									"value": "@string(activity('Get WoWToken Data').output.last_updated_timestamp)\n",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Save Output to Blob",
+							"type": "WebActivity",
+							"dependsOn": [
+								{
+									"activity": "Get WoWToken Data",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"url": {
+									"value": "@replace(variables('BlobSASURL'), '/tokenjson?', concat('/tokenjson/wowTokenPriceEu_', formatDateTime(utcnow(), 'yyyyMMdd-HHmmss'), '.json?'))",
+									"type": "Expression"
+								},
+								"method": "PUT",
+								"headers": {
+									"x-ms-blob-type": "BlockBlob"
+								},
+								"body": {
+									"value": "@activity('Get WoWToken Data').output",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"variables": {
+			"last_updated_time": {
+				"type": "String"
+			},
+			"access_token": {
+				"type": "String"
+			},
+			"token_price": {
+				"type": "String"
+			},
+			"BlobSASURL": {
+				"type": "String",
+				"defaultValue": "https://aucsa.blob.core.windows.net/tokenjson?sv=2022-11-02&ss=bfqt&srt=sco&sp=rwdlacupiytfx&se=2023-09-01T01:36:32Z&st=2023-05-08T17:36:32Z&spr=https&sig=HN2Ko1GJ6bVtmDjN2LXtONnKgAQEj2v7zWgnMgmfxpU%3D"
+			},
+			"DaTimeArray": {
+				"type": "Array"
+			}
+		},
+		"annotations": []
+	}
+}

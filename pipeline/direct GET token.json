@@ -1,0 +1,83 @@
+{
+	"name": "direct GET token",
+	"properties": {
+		"activities": [
+			{
+				"name": "Web1",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": "https://eu.api.blizzard.com/data/wow/token/?namespace=dynamic-eu",
+					"method": "GET",
+					"headers": {
+						"Authorization": "Bearer EUGmWlrL0C4AMsaQdMR71PILoE4Ha4UxUt"
+					},
+					"body": "grant_type=client_credentials&client_id=$clientId&client_secret=kahP2k65BVoz77OxQb25wy6BN5OTCHeS"
+				}
+			},
+			{
+				"name": "Set timestamp",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Web1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "last_updated_time",
+					"value": {
+						"value": "@string(activity('Web1').output.last_updated_timestamp)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set token price",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Set timestamp",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "tokenprice",
+					"value": {
+						"value": "@string(activity('Web1').output.price)",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"variables": {
+			"last_updated_time": {
+				"type": "String"
+			},
+			"lt": {
+				"type": "Array"
+			},
+			"tokenprice": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "draft and test"
+		},
+		"annotations": []
+	}
+}

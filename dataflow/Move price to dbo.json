@@ -1,0 +1,115 @@
+{
+	"name": "Move price to dbo",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "STG_stgSchema",
+						"type": "DatasetReference"
+					},
+					"name": "StagingStg"
+				},
+				{
+					"dataset": {
+						"referenceName": "STG_dboSchema",
+						"type": "DatasetReference"
+					},
+					"name": "StagingDbo"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "STG_dboSchema_test",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedColumnspriceymd"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "selectStgColumns"
+				},
+				{
+					"name": "getOnlyNewRows"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          WindowEndTime as timestamp,",
+				"          cnt as integer,",
+				"          averageprice as decimal(12,2),",
+				"          min_time_win as timestamp,",
+				"          max_time_win as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> StagingStg",
+				"source(output(",
+				"          originalTimeWindow as timestamp,",
+				"          measureCount as integer,",
+				"          tokenPrice as decimal(10,2),",
+				"          YMD as integer,",
+				"          aggTimeCheck as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> StagingDbo",
+				"selectStgColumns derive(tokenPrice_decimal = toDecimal(divide(stg_averageprice, 10000), 10, 2),",
+				"          YMD_int = toInteger(toString(toDate(stg_WindowEndTime),'yyyyMMdd')),",
+				"          WindowEndTime_str = toString(split(toString(stg_WindowEndTime), ' ')[2],'HH:mm:ss')) ~> derivedColumnspriceymd",
+				"derivedColumnspriceymd select(mapColumn(",
+				"          stg_WindowEndTime,",
+				"          stg_cnt,",
+				"          stg_averageprice,",
+				"          tokenPrice_decimal,",
+				"          YMD_int,",
+				"          WindowEndTime_str",
+				"     ),",
+				"     skipDuplicateMapInputs: false,",
+				"     skipDuplicateMapOutputs: false) ~> select1",
+				"getOnlyNewRows select(mapColumn(",
+				"          stg_WindowEndTime = WindowEndTime,",
+				"          stg_cnt = cnt,",
+				"          stg_averageprice = averageprice",
+				"     ),",
+				"     skipDuplicateMapInputs: false,",
+				"     skipDuplicateMapOutputs: false) ~> selectStgColumns",
+				"StagingStg, StagingDbo exists(WindowEndTime == originalTimeWindow,",
+				"     negate:true,",
+				"     broadcast: 'auto')~> getOnlyNewRows",
+				"select1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          originalTimeWindow as timestamp,",
+				"          measureCount as integer,",
+				"          tokenPrice as decimal(10,2),",
+				"          YMD as integer,",
+				"          aggTimeCheck as timestamp",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          originalTimeWindow = stg_WindowEndTime,",
+				"          measureCount = stg_cnt,",
+				"          tokenPrice = stg_averageprice,",
+				"          YMD = YMD_int",
+				"     )) ~> sink1"
+			]
+		}
+	}
+}

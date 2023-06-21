@@ -1,0 +1,10 @@
+{
+	"name": "AzureKeyVaultAuc",
+	"properties": {
+		"annotations": [],
+		"type": "AzureKeyVault",
+		"typeProperties": {
+			"baseUrl": "https://AucPetKeyVault.vault.azure.net/"
+		}
+	}
+}
